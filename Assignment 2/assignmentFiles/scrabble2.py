@@ -136,6 +136,11 @@ printTiles(myTiles)
 ########################################################################
 # Write your code below this
 ########################################################################
+#Declaring global variables
+boardSize = len(Board)
+firstMove = False
+
+
 #Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
     bannedCharacters = " 12345678\90-=[];',./!@#$%^&*()?_+{}|<>:"
@@ -179,13 +184,17 @@ def tileCheck(chosenWord):
         return True
 
 #Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
-def tilePlacer(chosenWord,location):
-    pass
+def tilePlacer(chosenWord):
+    if firstMove == True:
+        pass
+    else:
+        pass
 
-#Given a location for the word, it will check if the location is valid.
-def locationCheck(location):
-    location = location.split(":")
+        
     
+
+#Given a location for the word, it will check if the location is valid IN SYNTAX.
+def locationCheck(location):
     #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
     #was not correctly used.
     if len(location) != 3:
@@ -207,14 +216,15 @@ def locationCheck(location):
     elif not(0 <= int(location[1]) < boardSize) or not(0 <= int(location[0]) < boardSize):
         print("Your row and columns are not in range.")
         return False
-
     return True
 
 while True:
-    #Input for chosenWord and location
+    #Input for chosenWord and location, followed by adjusting the format of them
     chosenWord = input("\nPlease enter a word: ")
     chosenWord = chosenWord.upper()
+    
     wordLocation = input("Enter the location in row:col:direction format: ")
+    wordLocation = wordLocation.split(":")    
     
     if chosenWord == "***":
         print("Better luck next time!")
@@ -222,7 +232,4 @@ while True:
     
     elif letterCheck(chosenWord) and dictionaryCheck(chosenWord):
         if tileCheck(chosenWord):
-            print("Cool, this is a valid word.")
-            break
-        else:
-            print("This word cannot be made using the tile")
+            pass
