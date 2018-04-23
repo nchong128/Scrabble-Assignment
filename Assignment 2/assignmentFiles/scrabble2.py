@@ -184,14 +184,9 @@ def tileCheck(chosenWord):
         return True
 
 #Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
-def tilePlacer(chosenWord):
-    if firstMove == True:
-        pass
-    else:
-        pass
+def tilePlacer(chosenWord,location):
+    pass
 
-        
-    
 
 #Given a location for the word, it will check if the location is valid IN SYNTAX.
 def locationCheck(location):
