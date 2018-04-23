@@ -136,6 +136,7 @@ printTiles(myTiles)
 ########################################################################
 # Write your code below this
 ########################################################################
+#Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
     bannedCharacters = " 12345678\90-=[];',./!@#$%^&*()?_+{}|<>:"
     if len(chosenWord) == 0:
@@ -148,7 +149,7 @@ def letterCheck(chosenWord):
                 return False
     return True
 
-print(Board)
+#Checks if chosenWord is found in the dictionary.txt
 def dictionaryCheck(chosenWord):
     dictionaryFile = open("dictionary.txt","r")
     for line in dictionaryFile:
@@ -160,6 +161,7 @@ def dictionaryCheck(chosenWord):
     dictionaryFile.close()
     return False
 
+#CHecks if chosenWord can be made from the tiles
 def tileCheck(chosenWord):
     duplicateTiles = myTiles[:]
     count = 0
@@ -176,19 +178,49 @@ def tileCheck(chosenWord):
     else:
         return True
 
-
-    
 #Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
 def tilePlacer(chosenWord,location):
     pass
 
+#Given a location for the word, it will check if the location is valid.
+def locationCheck(location):
+    location = location.split(":")
+    
+    #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
+    #was not correctly used.
+    if len(location) != 3:
+        print(": format not followed.")
+        return False
+    
+    #Checks if the d on h:c:d is either H or V
+    elif location[2] != ("H" or "V"):
+        print("Your direction must be either H or V.")
+        return False
+
+    #isdigit() is a method that checks if the given string is an integer. This is used
+    #to check if the r and c are integers
+    elif location[0].isdigit() == False or location[1].isdigit() == False:
+        print("Your r and c values must be integers.")
+        return False
+    
+    #Checks if r and c are both between the appropriate range
+    elif not(0 <= int(location[1]) < boardSize) or not(0 <= int(location[0]) < boardSize):
+        print("Your row and columns are not in range.")
+        return False
+
+    return True
+
 while True:
+    #Input for chosenWord and location
     chosenWord = input("\nPlease enter a word: ")
     chosenWord = chosenWord.upper()
+    wordLocation = input("Enter the location in row:col:direction format: ")
+    
     if chosenWord == "***":
         print("Better luck next time!")
         break
-    if letterCheck(chosenWord) and dictionaryCheck(chosenWord):
+    
+    elif letterCheck(chosenWord) and dictionaryCheck(chosenWord):
         if tileCheck(chosenWord):
             print("Cool, this is a valid word.")
             break
