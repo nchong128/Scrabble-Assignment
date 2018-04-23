@@ -1,8 +1,8 @@
 # REPRESENTS A 5X5 BOARD- DO NOT DELETE
-Board = [['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', '']]
+Board = [['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', '']]
 boardSize = len(Board)
-firstMove = False
-wordLocation = ["1","1","H"]
+first1Move = False
+wordLocation = ["3","3","H"]
 # REPRESENTS A 5X5 BOARD- DO NOT DELETE
 
 def tilePlacer(chosenWord,location):
