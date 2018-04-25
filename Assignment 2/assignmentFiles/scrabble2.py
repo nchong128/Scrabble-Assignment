@@ -140,7 +140,6 @@ printTiles(myTiles)
 boardSize = len(Board)
 firstMove = False
 
-
 #Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
     bannedCharacters = " 12345678\90-=[];',./!@#$%^&*()?_+{}|<>:"
@@ -183,21 +182,17 @@ def tileCheck(chosenWord):
     else:
         return True
 
-#Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
-def tilePlacer(chosenWord,location):
-    pass
-
-
-#Given a location for the word, it will check if the location is valid IN SYNTAX.
-def locationCheck(location):
+#Given a location for the word, it will check if the location is valid IN SYNTAX (e.g. fitting the
+#format r:c:d)
+def locationSyntaxCheck(location):
     #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
     #was not correctly used.
     if len(location) != 3:
         print(": format not followed.")
         return False
     
-    #Checks if the d on h:c:d is either H or V
-    elif location[2] != ("H" or "V"):
+    #Checks if the d in h:c:d is either H or V
+    elif location[2] != "H" and location[2] != "V":
         print("Your direction must be either H or V.")
         return False
 
@@ -212,6 +207,10 @@ def locationCheck(location):
         print("Your row and columns are not in range.")
         return False
     return True
+
+#Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
+def tilePlacer(chosenWord,location):
+    pass
 
 while True:
     #Input for chosenWord and location, followed by adjusting the format of them
