@@ -165,7 +165,7 @@ def dictionaryCheck(chosenWord):
     dictionaryFile.close()
     return False
 
-#CHecks if chosenWord can be made from the tiles
+#Checks if chosenWord can be made from the tiles
 def tileCheck(chosenWord):
     duplicateTiles = myTiles[:]
     count = 0
@@ -208,9 +208,7 @@ def locationSyntaxCheck(location):
         return False
     return True
 
-#Assuming that the chosenWord and it's location is valid. It will place the word onto the tiles.
-def tilePlacer(chosenWord,location):
-    pass
+
 
 while True:
     #Input for chosenWord and location, followed by adjusting the format of them
