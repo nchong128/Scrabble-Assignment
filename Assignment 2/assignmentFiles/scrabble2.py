@@ -208,7 +208,52 @@ def locationSyntaxCheck(location):
         return False
     return True
 
-#locationPlaceCheck here
+#This function will check if the word will be allowed to be placed into the Board, given a
+#syntactically correct location and valid word.
+def locationPlaceCheck(chosenWord,location):
+    middleOfBoard = len(Board) // 2
+    row = int(location[0])
+    column = int(location[1])
+    
+    horizontalLimit = column + len(chosenWord)
+    verticalLimit = row + len(chosenWord)
+    lettersPassed = []
+    
+    #Checks if word is can be placed within the Board's dimension limits
+    if (location[2] == "H" and horizontalLimit > len(Board)) or (location[2] == "V" and verticalLimit > len(Board)):
+        print("Word cannot fit on the Board.")
+        return False
+    
+    #If it is not the firstmove , it scans through the board using the locations given and place
+    #records the number of letters passed into a list. If number of letters passed = 1 and
+    #the letter is the letter matching the chosenWord[index] then it is fine. 
+    if firstMove == False:
+        if location[2] == "H":
+            for i in range(column, horizontalLimit):
+                if len(Board[row][i]) == 1:
+                    lettersPassed.append([i,Board[row][i]])
+        
+        elif location[2] == "V":
+            for i in range(row, verticalLimit):
+                if len(Board[i][column]) == 1:
+                    lettersPassed.append([i,Board[i][column]])
+        
+        if len(lettersPassed) < 1:
+            print("Invalid move, you must use at least one tile from the Board")
+            return False
+
+        for letterPair in lettersPassed:
+            if (letterPair[1] != chosenWord[letterPair[0]]):
+                print("Invalid move, word must match the tile on the board at the correct location")
+                return False
+
+    #Checks if word is placed in the middle of the board by ensuring the row and columns
+    #are equal to the middle of the board. Applicable only for the first move.
+    if firstMove == True and (row != middleOfBoard or column != middleOfBoard):
+        print("First move must have the word placed in the middle of the board.")
+        return False
+
+    return True
 
 #This function will place the VALID word into Board using the location (r:c:d) given
 #META: Will need adjustment to changign everything after the first tile
@@ -235,7 +280,7 @@ while True:
     #Input for chosenWord and location, followed by adjusting the format of them
     chosenWord = input("\nPlease enter a word: ")
     chosenWord = chosenWord.upper()
-    
+
     if chosenWord == "***":
         print("Better luck next time!")
         break
