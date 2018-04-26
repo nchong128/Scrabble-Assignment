@@ -138,7 +138,7 @@ printTiles(myTiles)
 ########################################################################
 #Declaring global variables
 boardSize = len(Board)
-firstMove = False
+firstMove = True
 
 #Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
@@ -208,29 +208,7 @@ def locationSyntaxCheck(location):
         return False
     return True
 
-#This function will check if the word will be allowed to be placed into the Board, given a
-#syntactically correct location and valid word.
-def locationPlaceCheck(chosenWord,location):
-    middleOfBoard = len(Board) // 2
-    
-    row = int(location[0])
-    column = int(location[1])
-
-    horizontalLimit = column + len(chosenWord)
-    verticalLimit = row + len(chosenWord)
-    
-    #Checks if word is placed in the middle of the board by ensuring the row and columns
-    #are equal to the middle of the board. Applicable only for the first move.
-    if firstMove == True and (row != middleOfBoard or column != middleOfBoard):
-        print("First move must have the word placed in the middle of the board.")
-        return False
-    
-    #Checks if word is can be placed within the Board's dimension limits
-    elif (location[2] == "H" and horizontalLimit > len(Board)) or (location[2] == "V" and verticalLimit > len(Board)):
-        print("Word cannot fit on the Board.")
-        return False
-
-    return True
+#locationPlaceCheck here
 
 #This function will place the VALID word into Board using the location (r:c:d) given
 #META: Will need adjustment to changign everything after the first tile
@@ -258,14 +236,17 @@ while True:
     chosenWord = input("\nPlease enter a word: ")
     chosenWord = chosenWord.upper()
     
-    wordLocation = input("Enter the location in row:col:direction format: ")
-    wordLocation = wordLocation.split(":")    
-    
     if chosenWord == "***":
         print("Better luck next time!")
         break
     
-    elif letterCheck(chosenWord) and dictionaryCheck(chosenWord) and tileCheck(chosenWord):
-        if locationPlaceCheck(chosenWord,wordLocation) and locationSyntaxCheck(chosenWord,wordLocation):
+    wordLocation = input("Enter the location in row:col:direction format: ")
+    wordLocation = wordLocation.split(":")    
+    
+    if letterCheck(chosenWord) and dictionaryCheck(chosenWord) and tileCheck(chosenWord):
+        if locationSyntaxCheck(wordLocation) and locationPlaceCheck(chosenWord,wordLocation):
             tilePlacer(chosenWord,wordLocation)
-            print(Board)
+            printBoard(Board)
+
+            if firstMove:
+                firstMove = False
