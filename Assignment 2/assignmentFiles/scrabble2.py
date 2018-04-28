@@ -139,6 +139,7 @@ printTiles(myTiles)
 #Declaring global variables
 boardSize = len(Board)
 firstMove = True
+totalScore = 0
 
 #Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
@@ -234,18 +235,7 @@ def locationPlaceCheck(chosenWord,location):
     #records the number of letters passed into a list. If number of letters passed > 1 and
     #every letter in that list matches a letter from chosenWord then it is fine. 
     if firstMove == False:
-        index = 0
-        if location[2] == "H":
-            for i in range(column, horizontalLimit):
-                if len(Board[row][i]) == 1:
-                    lettersPassed.append([index,Board[row][i]])
-                index += 1
-        
-        elif location[2] == "V":
-            for i in range(row, verticalLimit):
-                if len(Board[i][column]) == 1:
-                    lettersPassed.append([index,Board[i][column]])
-                index += 1
+        lettersPassed = currentTileCheck(location)
         
         if len(lettersPassed) < 1:
             print("Invalid move, you must use at least one tile from the Board")
@@ -255,13 +245,48 @@ def locationPlaceCheck(chosenWord,location):
             if (letterPair[1] != chosenWord[letterPair[0]]):
                 print("Invalid move, word must match the tile on the board at the correct location")
                 return False
-
     return True
 
 def tileRemover(chosenWord):
     for letter in chosenWord:
         myTiles.remove(letter)
 
+def currentTileCheck(location):
+    row = int(location[0])
+    column = int(location[1])
+    horizontalLimit = column + len(chosenWord)
+    verticalLimit = row + len(chosenWord)
+    lettersPassed = []
+    index = 0
+    
+    if location[2] == "H":
+        for i in range(column, horizontalLimit):
+            if len(Board[row][i]) == 1:
+                lettersPassed.append([index,Board[row][i]])
+            index += 1
+    
+    elif location[2] == "V":
+        for i in range(row, verticalLimit):
+            if len(Board[i][column]) == 1:
+                lettersPassed.append([index,Board[i][column]])
+            index += 1
+
+    return lettersPassed
+
+def moveScore(chosenWord):
+    total = 0
+    lettersPassed = currentTileCheck(wordLocation)
+
+    for letter in chosenWord:
+        letterInBoard = False
+        for entry in lettersPassed:
+            if letter == entry[1]:
+                letterInBoard = True
+        
+        if letterInBoard == False:
+            total += getScore(letter)
+
+    return total
 #This function will place the VALID word into Board using the location (r:c:d) given
 #META: Will need adjustment to changing everything after the first tile
 def tilePlacer(chosenWord,location):
@@ -305,12 +330,13 @@ while True:
             
             #Functions used to place the word on the Board, print the board, remove the tiles, followed by
             #updating the tiles
+            totalScore += moveScore(chosenWord)
+            print('Your score in this move: ' + str(moveScore(chosenWord)))
+            print('Your total score is: ' + str(totalScore))
             tilePlacer(chosenWord,wordLocation)
             printBoard(Board)
             tileRemover(chosenWord)
+            
             getTiles(myTiles)
             printTiles(myTiles)
             
-
-
-
