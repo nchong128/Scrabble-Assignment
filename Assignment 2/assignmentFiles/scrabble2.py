@@ -260,7 +260,7 @@ def locationPlaceCheck(chosenWord,location):
     #Checks if word is placed in the middle of the board by ensuring the row and columns
     #are equal to the middle of the board. Applicable only for the first move.
     if firstMove == True and (row != middleOfBoard or column != middleOfBoard):
-        print("First move must have the word placed in the middle of the board.")
+        print("The location in the first move must be " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":H or " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":V")
         return False
 
     #If it is not the first move , it scans through the board using the locations given and place
