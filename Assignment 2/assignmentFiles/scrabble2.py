@@ -184,6 +184,7 @@ def tileCheck(chosenWord,wordLocation):
             duplicateTiles.remove(letter)
     return True
 
+#Computes the score for the move
 def moveScore(chosenWord):
     total = 0
     lettersPassed = currentTileCheck(wordLocation)
