@@ -141,17 +141,22 @@ boardSize = len(Board)
 firstMove = True
 totalScore = 0
 
+# returns True if and only if target is in the collection (e.g., a string or a list)
+def isIn(target, collection):
+    for item in collection:
+        if target == item:
+            return True
+    return False
+
 #Checks if chosenWord is valid and made of English letters
 def letterCheck(chosenWord):
-    bannedCharacters = " 12345678\90-=[];',./!@#$%^&*()?_+{}|<>:"
+    Alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',  'P', 'Q', 'R', 'S', 'T','U', 'V', 'W', 'X', 'Y', 'Z']
     if len(chosenWord) == 0:
         print("You haven't even entered anything!")
         return False
     for letter in chosenWord:
-        for character in bannedCharacters:
-            if letter == character:
-                print("Only use English letters!!!")
-                return False
+        if isIn(letter.upper(), Alphabets) == False:
+            return False
     return True
 
 #Checks if chosenWord is found in the dictionary.txt
@@ -162,28 +167,55 @@ def dictionaryCheck(chosenWord):
         if chosenWord == scannedWord:
             dictionaryFile.close()
             return True
-    print("Your word is not found!")
     dictionaryFile.close()
     return False
 
 #Checks if chosenWord can be made from the tiles
-def tileCheck(chosenWord):
-    duplicateTiles = myTiles[:]
-    count = 0
-    for letter in chosenWord:
-        index = 0
-        while index < len(duplicateTiles):
-            if letter == duplicateTiles[index]:
-                duplicateTiles.remove(duplicateTiles[index])
-                count += 1
-                break
-            index += 1
-    if count != len(chosenWord):
-        return False
-    else:
-        return True
+def tileCheck(chosenWord,wordLocation):
+    duplicateTiles = myTiles.copy()
 
-#Given a location for the word, it will check if the location is valid IN SYNTAX (e.g. fitting the
+    for letterPair in currentTileCheck(wordLocation):
+        duplicateTiles.append(letterPair[1])
+
+    for letter in chosenWord:
+        if isIn(letter, duplicateTiles) == False:
+            return False
+        else:
+            duplicateTiles.remove(letter)
+    return True
+
+def moveScore(chosenWord):
+    total = 0
+    lettersPassed = currentTileCheck(wordLocation)
+
+    for letter in chosenWord:
+        letterInBoard = False
+        for entry in lettersPassed:
+            if letter == entry[1]:
+                letterInBoard = True
+        
+        if letterInBoard == False:
+            total += getScore(letter)
+
+    return total
+
+#Returns True if and only if all three criterias for the word is satisfied
+def wordIsValid(chosenWord):
+    if letterCheck(chosenWord) == False:
+        print("Only use English letters!!")
+        return False
+
+    elif dictionaryCheck(chosenWord) == False:
+        print("Your word is not found!!")
+        return False
+
+    elif tileCheck(chosenWord,wordLocation) == False:
+        print("This word cannot be made using the tiles!!")
+        return False
+
+    return True
+
+#Given a location for the word, it will check if the location is valid IN SYNTAX (i.e. fitting the
 #format r:c:d)
 def locationSyntaxCheck(location):
     #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
@@ -212,7 +244,7 @@ def locationSyntaxCheck(location):
 #This function will check if the word will be allowed to be placed into the Board, given a
 #syntactically correct location and valid word.
 def locationPlaceCheck(chosenWord,location):
-    middleOfBoard = len(Board) // 2
+    middleOfBoard = boardSize // 2
     row = int(location[0])
     column = int(location[1])
     
@@ -221,7 +253,7 @@ def locationPlaceCheck(chosenWord,location):
     lettersPassed = []
     
     #Checks if word is can be placed within the Board's dimension limits
-    if (location[2] == "H" and horizontalLimit > len(Board)) or (location[2] == "V" and verticalLimit > len(Board)):
+    if (location[2] == "H" and horizontalLimit > boardSize) or (location[2] == "V" and verticalLimit > len(Board)):
         print("Word cannot fit on the Board.")
         return False
     
@@ -247,9 +279,19 @@ def locationPlaceCheck(chosenWord,location):
                 return False
     return True
 
+def locationIsValid(chosenWord,wordLocation):
+    if locationSyntaxCheck(wordLocation) == False:
+        return False
+    
+    elif locationPlaceCheck(chosenWord,wordLocation) == False:
+        return False
+    
+    return True
+
 def tileRemover(chosenWord):
     for letter in chosenWord:
-        myTiles.remove(letter)
+        if letter in myTiles:
+            myTiles.remove(letter)
 
 def currentTileCheck(location):
     row = int(location[0])
@@ -273,20 +315,6 @@ def currentTileCheck(location):
 
     return lettersPassed
 
-def moveScore(chosenWord):
-    total = 0
-    lettersPassed = currentTileCheck(wordLocation)
-
-    for letter in chosenWord:
-        letterInBoard = False
-        for entry in lettersPassed:
-            if letter == entry[1]:
-                letterInBoard = True
-        
-        if letterInBoard == False:
-            total += getScore(letter)
-
-    return total
 #This function will place the VALID word into Board using the location (r:c:d) given
 #META: Will need adjustment to changing everything after the first tile
 def tilePlacer(chosenWord,location):
@@ -314,29 +342,27 @@ while True:
     chosenWord = chosenWord.upper()
 
     if chosenWord == "***":
-        print("Better luck next time!")
+        print("Better luck next time!!!")
         break
-    
+
     wordLocation = input("Enter the location in row:col:direction format: ")
     wordLocation = wordLocation.split(":")    
     
-    #If the word given fits all 3 criterias (from Assignment 1)
-    if letterCheck(chosenWord) and dictionaryCheck(chosenWord) and tileCheck(chosenWord):
-        #If the location given fits the syntax of r:c:d and if it is able to be placed
-        #on the board
-        if locationSyntaxCheck(wordLocation) and locationPlaceCheck(chosenWord,wordLocation):
+    #Checks if the word given fits all 3 criterias (from Assignment 1) and if
+    #the 2 criterias (from Assignment 2)
+    if locationIsValid(chosenWord,wordLocation):
+        if wordIsValid(chosenWord):
             if firstMove:
                 firstMove = False
             
-            #Functions used to place the word on the Board, print the board, remove the tiles, followed by
-            #updating the tiles
+            #Finding the move's score and adding it to the total score
             totalScore += moveScore(chosenWord)
             print('Your score in this move: ' + str(moveScore(chosenWord)))
             print('Your total score is: ' + str(totalScore))
+            
             tilePlacer(chosenWord,wordLocation)
             printBoard(Board)
-            tileRemover(chosenWord)
             
+            tileRemover(chosenWord)
             getTiles(myTiles)
             printTiles(myTiles)
-            
