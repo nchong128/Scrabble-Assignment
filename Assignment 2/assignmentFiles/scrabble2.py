@@ -171,10 +171,10 @@ def dictionaryCheck(chosenWord):
     return False
 
 #Checks if chosenWord can be made from the tiles
-def tileCheck(chosenWord,wordLocation):
+def tileCheck(chosenWord,location):
     duplicateTiles = myTiles.copy()
 
-    for letterPair in currentTileCheck(wordLocation):
+    for letterPair in currentTileCheck(location):
         duplicateTiles.append(letterPair[1])
 
     for letter in chosenWord:
@@ -255,14 +255,14 @@ def locationPlaceCheck(chosenWord,location):
     
     #Checks if word is can be placed within the Board's dimension limits
     if (location[2] == "H" and horizontalLimit > boardSize) or (location[2] == "V" and verticalLimit > len(Board)):
-        print("Word cannot fit on the Board.")
-        return False
+        reason = "Word cannot fit on the Board."
+        return [False,reason]
     
     #Checks if word is placed in the middle of the board by ensuring the row and columns
     #are equal to the middle of the board. Applicable only for the first move.
     if firstMove == True and (row != middleOfBoard or column != middleOfBoard):
-        print("The location in the first move must be " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":H or " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":V")
-        return False
+        reason = "The location in the first move must be " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":H or " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":V"
+        return [False,reason]
 
     #If it is not the first move , it scans through the board using the locations given and place
     #records the number of letters passed into a list. If number of letters passed > 1 and
@@ -271,20 +271,21 @@ def locationPlaceCheck(chosenWord,location):
         lettersPassed = currentTileCheck(location)
         
         if len(lettersPassed) < 1:
-            print("Invalid move, you must use at least one tile from the Board")
-            return False
+            reason = "Invalid move, you must use at least one tile from the Board"
+            return [False,reason]
 
         for letterPair in lettersPassed:
             if (letterPair[1] != chosenWord[letterPair[0]]):
                 print("Invalid move, word must match the tile on the board at the correct location")
-                return False
-    return True
+                return [False,reason]
+    return [True]
 
-def locationIsValid(chosenWord,wordLocation):
-    if locationSyntaxCheck(wordLocation) == False:
+def locationIsValid(chosenWord,location):
+    if locationSyntaxCheck(location) == False:
         return False
     
-    elif locationPlaceCheck(chosenWord,wordLocation) == False:
+    elif locationPlaceCheck(chosenWord,location)[0] == False:
+        print(locationPlaceCheck(chosenWord,location)[1])
         return False
     
     return True
@@ -382,18 +383,28 @@ def maximumMoveScore():
     #Finds the best possible move for the first move
     if firstMove:
         print("This be d first move")
-        possibleLocation = [str(boardSize//2),str(boardSize//2),"H"]
 
         for word in wordPool:
-            if locationPlaceCheck(word,possibleLocation) and (moveScore(chosenWord,possibleLocation) > maxScore) and tileCheck(word, possibleLocation):
-                maxWord = word
-            
-            elif locationPlaceCheck(word,possibleLocation) == False:
-                possibleLocation[2] = "V"
-                if locationPlaceCheck(word,possibleLocation) and (moveScore(chosenWord,possibleLocation) > maxScore):
-                    maxWord = word
+            possibleLocation = [str(boardSize//2),str(boardSize//2),"H"]
 
-    print("Best word: " + maxWord)
+            if tileCheck(word, possibleLocation):
+                if locationPlaceCheck(word,possibleLocation)[0] and (moveScore(word,possibleLocation) > maxScore):
+                    maxWord = word
+                    maxScore = moveScore(word,possibleLocation)
+                
+                else:
+                    possibleLocation[2] = "V"
+                    if locationPlaceCheck(word,possibleLocation)[0] and (moveScore(word,possibleLocation) > maxScore):
+                        maxWord = word
+                        maxScore = moveScore(word,possibleLocation)
+
+    #Deals with finding the best possible move past the first move
+    else:
+        pass
+
+
+
+    print("Best word: " + str(maxWord) + " with a score of " + str(maxScore))
 
 while True:
     #Input for chosenWord and location, followed by adjusting the format of them
