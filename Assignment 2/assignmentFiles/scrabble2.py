@@ -279,7 +279,7 @@ def locationPlaceCheck(word,location):
 
         for letterPair in lettersPassed:
             if (letterPair[1] != word[letterPair[0]]):
-                print("Invalid move, word must match the tile on the board at the correct location")
+                reason = "Invalid move, word must match the tile on the board at the correct location"
                 return [False,reason]
     return [True]
 
@@ -349,7 +349,8 @@ def maximumMoveScore():
     letterPool = []
     wordPool = []
 
-    #Finds the possible letters that the maximum move can be made from
+    #Finds the possible letters that the maximum move can be made from, by adding 
+    #every letter in the Board and every letter in myTiles.
     for tile in myTiles:
         letterPool.append(tile)
 
@@ -361,8 +362,6 @@ def maximumMoveScore():
     print("This is the letter pool")
     print(letterPool)
 
-    duplicateLetterPool = letterPool.copy()
-
     #Opens the dictionary file and scans through for every word that
     #can be made from the letterPool AND is smaller than the Board
     #dimensions, appending them into wordPool
@@ -372,7 +371,7 @@ def maximumMoveScore():
         scannedWord = line.strip()
         validWordFlag = True
         
-        if tileCheck(scannedWord,duplicateLetterPool) == False:
+        if tileCheck(scannedWord,letterPool) == False:
             validWordFlag = False
         
         if len(scannedWord) > boardSize:
@@ -396,18 +395,67 @@ def maximumMoveScore():
                 if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
                     maxWord = possibleWord
                     maxScore = moveScore(possibleWord,possibleLocation)
+                    maxPosition = possibleLocation
                 
                 else:
                     possibleLocation[2] = "V"
                     if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
                         maxWord = possibleWord
                         maxScore = moveScore(possibleWord,possibleLocation)
+                        maxPosition = possibleLocation
 
     #Deals with finding the best possible move past the first move
     else:
-        pass
+        #Finds the rows and columns that are actually filled with a letter
+        rowsFilled = []
+        columnsFilled = []
 
-    print("Best word: " + str(maxWord) + " with a score of " + str(maxScore))
+        for i in range(boardSize):
+            for j in range(boardSize):
+                if len(Board[i][j]) > 0 and not isIn(i, rowsFilled):
+                    rowsFilled.append(i)
+                
+                if len(Board[j][i]) > 0 and not isIn(i, columnsFilled):
+                    columnsFilled.append(i)
+    
+        print(rowsFilled,columnsFilled)
+
+        #For every word in the wordPool, runs it through the Board with
+        #the rowsFilled and the columnsFilled only.
+        for possibleWord in wordPool:
+            print(possibleWord)
+            for rowNumber in rowsFilled:
+                for columnNumber in range(boardSize - len(possibleWord)):
+                    possibleLocation = [str(rowNumber),str(columnNumber),"H"]
+
+
+                    duplicateTiles = myTiles.copy()
+                    for letterPair in currentTileCheck(possibleWord,possibleLocation):
+                        duplicateTiles.append(letterPair[1])
+                    
+                    if tileCheck(possibleWord,duplicateTiles):
+                        if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
+                            maxWord = possibleWord
+                            maxScore = moveScore(possibleWord,possibleLocation)
+                            maxPosition = possibleLocation
+
+            for columnNumber in columnsFilled:
+                for rowNumber in range(boardSize - len(possibleWord)):
+                    possibleLocation = [str(rowNumber),str(columnNumber),"V"]
+                    
+                    duplicateTiles = myTiles.copy()
+                    for letterPair in currentTileCheck(possibleWord,possibleLocation):
+                        duplicateTiles.append(letterPair[1])
+                    
+                    if tileCheck(possibleWord,duplicateTiles):
+                        if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
+                            maxWord = possibleWord
+                            maxScore = moveScore(possibleWord,possibleLocation)
+                            maxPosition = possibleLocation
+        
+
+                    
+    print("Best word: " + str(maxWord) + " with a score of " + str(maxScore) + " at the location " + str(maxPosition))
 
 while True:
     #Input for chosenWord and location, followed by adjusting the format of them
