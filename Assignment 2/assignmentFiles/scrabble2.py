@@ -108,7 +108,7 @@ if rand == "Y":
 else:
     if rand != "N":
         print("You did not enter Y or N. Therefore, I am taking it as a Yes :P.")
-
+        SHUFFLE = True
 if SHUFFLE:
     random.shuffle(Tiles)
 
@@ -137,9 +137,9 @@ printTiles(myTiles)
 # Write your code below this
 ########################################################################
 #Declaring global variables
-boardSize = len(Board)
 firstMove = True
 totalScore = 0
+MIDDLE_OF_BOARD = BOARD_SIZE // 2
 
 # returns True if and only if target is in the collection (e.g., a string or a list)
 def isIn(target, collection):
@@ -174,7 +174,6 @@ def dictionaryCheck(word):
 #Checks if a given word can be made from the tiles
 def tileCheck(word, tiles):
     tileCopy = tiles.copy()
-
     for letter in word:
         if isIn(letter, tileCopy) == False:
             return False
@@ -205,11 +204,10 @@ def wordIsValid(word,location,tiles):
         return False
 
     elif dictionaryCheck(word) == False:
-        print("Your word is not found!!")
+        print("Your word doesn't exist in the dictionary!!!")
         return False
 
     duplicateTiles = tiles.copy()
-
     for letterPair in currentTileCheck(word,location):
         duplicateTiles.append(letterPair[1])
     
@@ -225,30 +223,25 @@ def locationSyntaxCheck(location):
     #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
     #was not correctly used.
     if len(location) != 3:
-        print(": format not followed.")
         return False
-    
+
     #Checks if the d in h:c:d is either H or V
     elif location[2] != "H" and location[2] != "V":
-        print("Your direction must be either H or V.")
         return False
 
     #isdigit() is a method that checks if the given string is an integer. This is used
     #to check if the r and c are integers
     elif location[0].isdigit() == False or location[1].isdigit() == False:
-        print("Your r and c values must be integers.")
         return False
     
     #Checks if r and c are both between the appropriate range
-    elif not(0 <= int(location[1]) < boardSize) or not(0 <= int(location[0]) < boardSize):
-        print("Your row and columns are not in range.")
+    elif not(0 <= int(location[1]) < BOARD_SIZE) or not(0 <= int(location[0]) < BOARD_SIZE):
         return False
     return True
 
 #This function will check if the word will be allowed to be placed into the Board, given a
 #syntactically correct location and valid word.
 def locationPlaceCheck(word,location):
-    middleOfBoard = boardSize // 2
     row = int(location[0])
     column = int(location[1])
     
@@ -257,16 +250,14 @@ def locationPlaceCheck(word,location):
     lettersPassed = []
     
     #Checks if word is can be placed within the Board's dimension limits
-    if (location[2] == "H" and horizontalLimit > boardSize) or (location[2] == "V" and verticalLimit > len(Board)):
-        reason = "Word cannot fit on the Board."
+    if (location[2] == "H" and horizontalLimit > BOARD_SIZE) or (location[2] == "V" and verticalLimit > BOARD_SIZE):
+        reason = "Invalid move! The word cannot fit on the Board."
         return [False,reason]
-    
     #Checks if word is placed in the middle of the board by ensuring the row and columns
     #are equal to the middle of the board. Applicable only for the first move.
-    if firstMove == True and (row != middleOfBoard or column != middleOfBoard):
-        reason = "The location in the first move must be " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":H or " + str(middleOfBoard) + ":" + str(middleOfBoard) + ":V"
+    if firstMove == True and (row != MIDDLE_OF_BOARD or column != MIDDLE_OF_BOARD):
+        reason = "Invalid move! The location in the first move must be " + str(MIDDLE_OF_BOARD) + ":" + str(MIDDLE_OF_BOARD) + ":H or " + str(MIDDLE_OF_BOARD) + ":" + str(MIDDLE_OF_BOARD) + ":V."
         return [False,reason]
-
     #If it is not the first move , it scans through the board using the locations given and place
     #records the number of letters passed into a list. If number of letters passed > 1 and
     #every letter in that list matches a letter from word then it is fine. 
@@ -274,23 +265,23 @@ def locationPlaceCheck(word,location):
         lettersPassed = currentTileCheck(word,location)
         
         if len(lettersPassed) < 1:
-            reason = "Invalid move, you must use at least one tile from the Board"
+            reason = "Invalid move! You must use at least one tile from the Board."
             return [False,reason]
 
         for letterPair in lettersPassed:
             if (letterPair[1] != word[letterPair[0]]):
-                reason = "Invalid move, word must match the tile on the board at the correct location"
+                reason = "Invalid move! The word must match the tile on the board at the correct location."
                 return [False,reason]
     return [True]
 
 def locationIsValid(word,location):
     if locationSyntaxCheck(location) == False:
+        print("Invalid move!!!")
         return False
-    
     elif locationPlaceCheck(word,location)[0] == False:
+        #Prints the reason for failure
         print(locationPlaceCheck(word,location)[1])
         return False
-    
     return True
 
 #This function will place the VALID word into Board using the location (r:c:d) given
@@ -302,22 +293,21 @@ def tilePlacer(word,location):
     #Dealing with where the word is to be placed horizontally
     if location[2] == "H":
         endPoint = column + len(word)
-        for i in range(column, endPoint):
-            Board[row][i] = word[WordIndex]
+        for columnNumber in range(column, endPoint):
+            Board[row][columnNumber] = word[WordIndex]
             WordIndex += 1
 
     #Dealing with where the word is to be placed vertically
     elif location[2] == "V": #META: May need changing to just else: ?
         endPoint = row + len(word)
-        for i in range(row, endPoint):
-            Board[i][column] = word[WordIndex]
+        for rowNumber in range(row, endPoint):
+            Board[rowNumber][column] = word[WordIndex]
             WordIndex += 1
 
 def tileRemover(word,location):
     for letter in word:
         if isIn(letter,primaryList):
             primaryList.remove(letter)
-
         elif isIn(letter,myTiles):
             myTiles.remove(letter)
 
@@ -326,21 +316,21 @@ def tileRemover(word,location):
 def currentTileCheck(word,location):
     row = int(location[0])
     column = int(location[1])
-    horizontalLimit = column + len(word)
-    verticalLimit = row + len(word)
     lettersPassed = []
     index = 0
     
     if location[2] == "H":
-        for i in range(column, horizontalLimit):
-            if len(Board[row][i]) == 1:
-                lettersPassed.append([index,Board[row][i]])
+        endPoint = column + len(word)
+        for columnNumber in range(column, endPoint):
+            if len(Board[row][columnNumber]) == 1:
+                lettersPassed.append([index,Board[row][columnNumber]])
             index += 1
     
     elif location[2] == "V":
-        for i in range(row, verticalLimit):
-            if len(Board[i][column]) == 1:
-                lettersPassed.append([index,Board[i][column]])
+        endPoint = row + len(word)
+        for rowNumber in range(row, endPoint):
+            if len(Board[rowNumber][column]) == 1:
+                lettersPassed.append([index,Board[rowNumber][column]])
             index += 1
 
     return lettersPassed
@@ -373,7 +363,7 @@ def maximumMoveScore():
         if tileCheck(scannedWord,letterPool) == False:
             validWordFlag = False
         
-        if len(scannedWord) > boardSize:
+        elif len(scannedWord) > BOARD_SIZE:
             validWordFlag = False
 
         if validWordFlag:
@@ -384,7 +374,7 @@ def maximumMoveScore():
     #Finds the best possible move for the first move
     if firstMove:
         for possibleWord in wordPool:
-            possibleLocation = [str(boardSize//2),str(boardSize//2),"H"]
+            possibleLocation = [str(MIDDLE_OF_BOARD),str(MIDDLE_OF_BOARD),"H"]
 
             if tileCheck(possibleWord, myTiles):
                 if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
@@ -405,19 +395,19 @@ def maximumMoveScore():
         rowsFilled = []
         columnsFilled = []
 
-        for i in range(boardSize):
-            for j in range(boardSize):
-                if len(Board[i][j]) > 0 and not isIn(i, rowsFilled):
-                    rowsFilled.append(i)
+        for primaryIndex in range(BOARD_SIZE):
+            for secondaryIndex in range(BOARD_SIZE):
+                if len(Board[primaryIndex][secondaryIndex]) > 0 and not isIn(primaryIndex, rowsFilled):
+                    rowsFilled.append(primaryIndex)
                 
-                if len(Board[j][i]) > 0 and not isIn(i, columnsFilled):
-                    columnsFilled.append(i)
+                if len(Board[secondaryIndex][primaryIndex]) > 0 and not isIn(primaryIndex, columnsFilled):
+                    columnsFilled.append(primaryIndex)
 
         #For every word in the wordPool, runs it through the Board with
         #the rowsFilled and the columnsFilled only.
         for possibleWord in wordPool:
             for rowNumber in rowsFilled:
-                for columnNumber in range(boardSize - len(possibleWord)):
+                for columnNumber in range(BOARD_SIZE - len(possibleWord)):
                     possibleLocation = [str(rowNumber),str(columnNumber),"H"]
 
                     duplicateTiles = myTiles.copy()
@@ -431,7 +421,7 @@ def maximumMoveScore():
                             maxPosition = possibleLocation
 
             for columnNumber in columnsFilled:
-                for rowNumber in range(boardSize - len(possibleWord)):
+                for rowNumber in range(BOARD_SIZE - len(possibleWord)):
                     possibleLocation = [str(rowNumber),str(columnNumber),"V"]
                     
                     duplicateTiles = myTiles.copy()
@@ -446,6 +436,7 @@ def maximumMoveScore():
         
     if moveScore(chosenWord,wordLocation) == maxScore:
         print("Your move was the best move! Well done!")
+    
     print("Maximum possible score in this move was " + str(maxScore) + " with word " + str(maxWord) + " at " + str(maxPosition[0]) + ":" + str(maxPosition[1]) + ":" + str(maxPosition[2]))
 
 while True:
