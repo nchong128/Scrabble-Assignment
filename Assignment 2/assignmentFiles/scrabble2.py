@@ -407,7 +407,7 @@ def maximumMoveScore():
         #the rowsFilled and the columnsFilled only.
         for possibleWord in wordPool:
             for rowNumber in rowsFilled:
-                for columnNumber in range(BOARD_SIZE - len(possibleWord)):
+                for columnNumber in range(BOARD_SIZE - len(possibleWord) + 1):
                     possibleLocation = [str(rowNumber),str(columnNumber),"H"]
 
                     duplicateTiles = myTiles.copy()
@@ -421,7 +421,7 @@ def maximumMoveScore():
                             maxPosition = possibleLocation
 
             for columnNumber in columnsFilled:
-                for rowNumber in range(BOARD_SIZE - len(possibleWord)):
+                for rowNumber in range(BOARD_SIZE - len(possibleWord) + 1):
                     possibleLocation = [str(rowNumber),str(columnNumber),"V"]
                     
                     duplicateTiles = myTiles.copy()
@@ -435,7 +435,7 @@ def maximumMoveScore():
                             maxPosition = possibleLocation
         
     if moveScore(chosenWord,wordLocation) == maxScore:
-        print("Your move was the best move! Well done!")
+        print("Your move was the best move! Well done! \n")
     
     print("Maximum possible score in this move was " + str(maxScore) + " with word " + str(maxWord) + " at " + str(maxPosition[0]) + ":" + str(maxPosition[1]) + ":" + str(maxPosition[2]))
 
