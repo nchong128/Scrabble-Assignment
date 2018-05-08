@@ -136,19 +136,42 @@ printTiles(myTiles)
 ########################################################################
 # Write your code below this
 ########################################################################
-#Declaring global variables
+"""
+Purpose: This file is to be used in Assignment 2 for FIT1045.
+Author: Anonymous
+Last modified: 8 May 2018
+"""
+
+# Global variables declared to be used throughout the code
 firstMove = True
 totalScore = 0
 MIDDLE_OF_BOARD = BOARD_SIZE // 2
 
-# returns True if and only if target is in the collection (e.g., a string or a list)
+""" isIn(target, collection)
+
+This function will check if the target is present in the collection by scanning through
+every item in the collection and comparing it against the target.
+
+arguments: target: a string/list/number to be compared with.
+           collection: a string/list/number to be searched through.
+
+returns: Returns True if the target is in the collection. False otherwise.
+"""
 def isIn(target, collection):
     for item in collection:
         if target == item:
             return True
     return False
 
-#Checks if a given word is valid and made of English letters
+""" letterCheck(word)
+
+This function will check if the argument consists of only alphabets (defined below)
+
+arguments: word: a string to be checked for alphabets
+
+returns: Returns False if any character in the string is not in the Alphabet list OR
+         the word has 0 length. True otherwise.
+"""
 def letterCheck(word):
     Alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',  'P', 'Q', 'R', 'S', 'T','U', 'V', 'W', 'X', 'Y', 'Z']
     if len(word) == 0:
@@ -159,8 +182,17 @@ def letterCheck(word):
             return False
     return True
 
-#Checks if a given word is found in the dictionary.txt, returning True if found
-#false otherwise
+""" dictionaryCheck(word)
+
+This function will check if the entered word exists in the dictionary.txt file by scanning
+through every line in the txt file, checking the scannedWord against the word.
+
+arguments: word: This represents the entered word to be checked against every line in the
+                 dictionary.txt file.
+
+returns: Returns True if any scannedWord matches the word.
+         Returns False if the loop reaches the end of the file without any matching.
+"""
 def dictionaryCheck(word):
     dictionaryFile = open("dictionary.txt","r")
     for line in dictionaryFile:
@@ -171,8 +203,18 @@ def dictionaryCheck(word):
     dictionaryFile.close()
     return False
 
-#Checks if a given word can be made from the tiles
+""" tileCheck(word, tiles)
+
+Checks if a given word can be made from the tiles.
+
+arguments: word: A string to be checked through against the tiles.
+           tiles: A list of characters that the word argument can be made of.
+
+returns: False if any letter in the word is not present in the tileCopy. True otherwise.
+"""
 def tileCheck(word, tiles):
+    # Copy method used to create a duplicate of the 'tiles' list without any references
+    # to it. Allows for reusability of the function without affecting the global variable
     tileCopy = tiles.copy()
     for letter in word:
         if isIn(letter, tileCopy) == False:
@@ -181,24 +223,84 @@ def tileCheck(word, tiles):
             tileCopy.remove(letter)
     return True
 
-#Computes the score for a specified word at a specified location
+""" currentTileCheck(word,location)
+
+This function will find all of the tiles already present on the Board, transforming them into
+a suitable table.
+
+arguments: word: A string given to be checked for its length, used as part of the upper bound
+                 of the range() when searching.
+           location: The location (in r:c:d format) to check for letters.
+
+returns: A table, lettersPassed, containing lists (commonly known as letterPairs in this code)
+         of letters found (at index 1) and its location (at index 0)
+"""
+def currentTileCheck(word,location):
+    row = int(location[0])
+    column = int(location[1])
+    lettersPassed = []
+    index = 0
+    
+    # The endpoint for where the function should be stopped searching is defined depending on
+    # if the search was horizontal or vertical.
+    if location[2] == "H":
+        endPoint = column + len(word)
+        for columnNumber in range(column, endPoint):
+            if len(Board[row][columnNumber]) == 1:
+                letterPair = [index,Board[row][columnNumber]]
+                lettersPassed.append(letterPair)
+            index += 1
+    
+    elif location[2] == "V":
+        endPoint = row + len(word)
+        for rowNumber in range(row, endPoint):
+            if len(Board[rowNumber][column]) == 1:
+                letterPair = [index,Board[rowNumber][column]]
+                lettersPassed.append(letterPair)
+            index += 1
+
+    return lettersPassed
+
+""" moveScore(word,location)
+
+Computes the score for a given word at a specified location. The location needs
+to be specified in order to avoid counting the score of letters already on the 
+Board.
+
+arguments: word: The word which the score will be counted for.
+           location: The location of where the word is to be placed (in r:c:d format).
+
+returns: The total score as a number.
+"""
 def moveScore(word,location):
     total = 0
+    # lettersPassed is a TABLE containing LISTS of letters and its location index for a
+    # given location and word. See currentTileCheck documentation for more info.
     lettersPassed = currentTileCheck(word,location)
 
     for letterIndex in range(len(word)):
         letterInBoard = False
+        # letter variable created in a similar format to a list in lettersPassed. Both in
+        # ["letter's index", "letter"] format.
         letter = [letterIndex, word[letterIndex]]
-        
         if isIn(letter, lettersPassed):
             letterInBoard = True
         if letterInBoard == False:
             total += getScore(letter[1])
-        
+
     return total
 
-#Returns True if and only if all three criterias for the word is satisfied
-def wordIsValid(word,location,tiles):
+""" wordIsValid(word,location)
+
+Puts a given word and location through all 3 criterias for a given word. If any condition
+is not met, it will print the reason why.
+
+argument: word: The word to check for validity.
+          location: The location to check for validity.
+
+returns: False if any of the conditions are not met. True otherwise.
+"""
+def wordIsValid(word,location):
     if letterCheck(word) == False:
         print("Only use English letters!!")
         return False
@@ -207,7 +309,9 @@ def wordIsValid(word,location,tiles):
         print("Your word doesn't exist in the dictionary!!!")
         return False
 
-    duplicateTiles = tiles.copy()
+    # duplicateTiles created to allow reusability (see above for copy method explanation).
+    # Appends all of the letters already on the Board at the given location to duplicateTiles.
+    duplicateTiles = myTiles.copy()
     for letterPair in currentTileCheck(word,location):
         duplicateTiles.append(letterPair[1])
     
@@ -217,11 +321,17 @@ def wordIsValid(word,location,tiles):
 
     return True
 
-#Given a location for the word, it will check if the location is valid IN SYNTAX (i.e. fitting the
-#format r:c:d)
+""" locationSyntaxCheck(location)
+
+Function will check if the location fits multiple syntax conditions.
+
+arguments: location: The string to be checked through if it follows all of the conditions
+
+returns: False if any of the conditions are not met. True otherwise.
+"""
 def locationSyntaxCheck(location):
-    #Checks if the location is split properly into 3 parts. If it hasn't that means that the colon
-    #was not correctly used.
+    # If the location is not split into 3 parts (not having a length of 3), then the r:c:d
+    # format was improperly used/not used.
     if len(location) != 3:
         return False
 
@@ -229,18 +339,28 @@ def locationSyntaxCheck(location):
     elif location[2] != "H" and location[2] != "V":
         return False
 
-    #isdigit() is a method that checks if the given string is an integer. This is used
-    #to check if the r and c are integers
+    # isdigit() is a method that checks if the given string is an integer. This is used
+    # to check if the r and c are integers.
     elif location[0].isdigit() == False or location[1].isdigit() == False:
         return False
     
-    #Checks if r and c are both between the appropriate range
+    # Checks if r and c are both between the appropriate range.
     elif not(0 <= int(location[1]) < BOARD_SIZE) or not(0 <= int(location[0]) < BOARD_SIZE):
         return False
+    
     return True
 
-#This function will check if the word will be allowed to be placed into the Board, given a
-#syntactically correct location and valid word.
+""" locationPlaceCheck(word,location)
+
+Function will check if the word is allowed to be placed on a Board, given a valid word and 
+a syntactically correct location.
+
+arguments: word: The word to be checked if it may be placed on the Board.
+           location: A syntactically correct location (i.e. Assuming that it satisfies locationSyntaxCheck)
+
+returns: A list containing a Boolean showing whether it may be placed on the Board or not (True if it can be
+         placed, False otherwise) and a reason for why the location is False (only if it is False).
+"""
 def locationPlaceCheck(word,location):
     row = int(location[0])
     column = int(location[1])
@@ -249,31 +369,36 @@ def locationPlaceCheck(word,location):
     verticalLimit = row + len(word)
     lettersPassed = []
     
-    #Checks if word is can be placed within the Board's dimension limits
+    # Checks if the word can be placed within the Board's dimension limits
     if (location[2] == "H" and horizontalLimit > BOARD_SIZE) or (location[2] == "V" and verticalLimit > BOARD_SIZE):
         reason = "Invalid move! The word cannot fit on the Board."
         return [False,reason]
-    #Checks if word is placed in the middle of the board by ensuring the row and columns
-    #are equal to the middle of the board. Applicable only for the first move.
+    
+    # Checks if the word is placed in the middle of the board by ensuring the row and column are equal to the middle
+    # of the board. Applicable only for the first move.
     if firstMove == True and (row != MIDDLE_OF_BOARD or column != MIDDLE_OF_BOARD):
         reason = "Invalid move! The location in the first move must be " + str(MIDDLE_OF_BOARD) + ":" + str(MIDDLE_OF_BOARD) + ":H or " + str(MIDDLE_OF_BOARD) + ":" + str(MIDDLE_OF_BOARD) + ":V."
         return [False,reason]
-    #If it is not the first move , it scans through the board using the locations given and place
-    #records the number of letters passed into a list. If number of letters passed > 1 and
-    #every letter in that list matches a letter from word then it is fine. 
+    
     if firstMove == False:
         lettersPassed = currentTileCheck(word,location)
         
+        # Checks if the word overlaps against any tiles already on the Board (i.e. If the word uses at least one tile.)
         if len(lettersPassed) < 1:
             reason = "Invalid move! You must use at least one tile from the Board."
             return [False,reason]
 
+        # Also checks if the word actually matches with the overlapped tiles by checking if the letter location is the
+        # same for both the word and the tiles on the Board.
         for letterPair in lettersPassed:
             if (letterPair[1] != word[letterPair[0]]):
                 reason = "Invalid move! The word must match the tile on the board at the correct location."
                 return [False,reason]
+    
     return [True]
 
+"""
+"""
 def locationIsValid(word,location):
     if locationSyntaxCheck(location) == False:
         print("Invalid move!!!")
@@ -311,29 +436,7 @@ def tileRemover(word,location):
         elif isIn(letter,myTiles):
             myTiles.remove(letter)
 
-#Given a word and location, it will scan through the tiles already occupied in that location
-#returning a table (lettersPassed) containing lists of the letters location and the letter itself
-def currentTileCheck(word,location):
-    row = int(location[0])
-    column = int(location[1])
-    lettersPassed = []
-    index = 0
-    
-    if location[2] == "H":
-        endPoint = column + len(word)
-        for columnNumber in range(column, endPoint):
-            if len(Board[row][columnNumber]) == 1:
-                lettersPassed.append([index,Board[row][columnNumber]])
-            index += 1
-    
-    elif location[2] == "V":
-        endPoint = row + len(word)
-        for rowNumber in range(row, endPoint):
-            if len(Board[rowNumber][column]) == 1:
-                lettersPassed.append([index,Board[rowNumber][column]])
-            index += 1
 
-    return lettersPassed
 
 def maximumMoveScore():
     maxScore = 0
@@ -448,7 +551,7 @@ while True:
     #Checks if the word given fits all 3 criterias (from Assignment 1) and if
     #the 2 criterias (from Assignment 2)
     if locationIsValid(chosenWord, wordLocation):
-        if wordIsValid(chosenWord,wordLocation,myTiles):
+        if wordIsValid(chosenWord,wordLocation):
             maximumMoveScore()
 
             if firstMove:
