@@ -186,15 +186,15 @@ def moveScore(word,location):
     total = 0
     lettersPassed = currentTileCheck(word,location)
 
-    for letter in word:
+    for letterIndex in range(len(word)):
         letterInBoard = False
-        for entry in lettersPassed:
-            if letter == entry[1]:
-                letterInBoard = True
+        letter = [letterIndex, word[letterIndex]]
         
+        if isIn(letter, lettersPassed):
+            letterInBoard = True
         if letterInBoard == False:
-            total += getScore(letter)
-
+            total += getScore(letter[1])
+        
     return total
 
 #Returns True if and only if all three criterias for the word is satisfied
