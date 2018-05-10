@@ -574,11 +574,15 @@ def maximumMoveScore():
     
     print("Maximum possible score in this move was " + str(maxScore) + " with word " + str(maxWord) + " at " + str(maxPosition[0]) + ":" + str(maxPosition[1]) + ":" + str(maxPosition[2]))
 
+
+# A continuous while loop that will keep allowing the user to input words and locations to be placed
+# on the Board until the word is "***"
 while True:
-    #Input for chosenWord and location, followed by adjusting the format of them
+    #Input for chosenWord and location
     chosenWord = input("\nPlease enter a word: ")
     chosenWord = chosenWord.upper()
 
+    # break command here is the only way to exit the while loop here
     if chosenWord == "***":
         print("Better luck next time!!!")
         break
@@ -586,8 +590,8 @@ while True:
     wordLocation = input("Enter the location in row:col:direction format: ")
     wordLocation = wordLocation.split(":")    
     
-    #Checks if the word given fits all 3 criterias (from Assignment 1) and if
-    #the 2 criterias (from Assignment 2)
+    # Checks if the word and location is valid. Note that two if statements are used
+    # Due to some assumptions from wordIsValid relying on if locationIsValid is true
     if locationIsValid(chosenWord, wordLocation):
         if wordIsValid(chosenWord,wordLocation):
             maximumMoveScore()
@@ -600,13 +604,15 @@ while True:
             print('Your score in this move: ' + str(moveScore(chosenWord,wordLocation)))
             print('Your total score is: ' + str(totalScore))
             
+            # Creates a primaryList containing every letter already on the Board
+            # at a given location. primaryList is used in the tileRemover function
             primaryList = []
             for letterPair in currentTileCheck(chosenWord,wordLocation):
                 primaryList.append(letterPair[1])
 
+            # Remaining functions called to advance to the next move
             tilePlacer(chosenWord,wordLocation)
             printBoard(Board)
-
             tileRemover(chosenWord)
             getTiles(myTiles)
             printTiles(myTiles)
