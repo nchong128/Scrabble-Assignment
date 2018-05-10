@@ -479,7 +479,7 @@ def maximumMoveScore():
     letterPool = []
     wordPool = []
 
-    # Makes letterPool by adding myTiles' letters and letters in the Board
+    # Makes letterPool by adding myTiles' letters and letters already in the Board
     for tile in myTiles:
         letterPool.append(tile)
 
@@ -488,7 +488,6 @@ def maximumMoveScore():
             if len(letter) > 0:
                 letterPool.append(letter) 
     
-
     # Creates the wordPool by appending words from dictionary.txt, making sure they
     # satisfy certain conditions
     dictionaryFile = open("dictionary.txt","r")
@@ -501,14 +500,17 @@ def maximumMoveScore():
             validWordFlag = False
         elif len(scannedWord) > BOARD_SIZE:
             validWordFlag = False
+        
         if validWordFlag:
             wordPool.append(scannedWord)
     dictionaryFile.close()
 
-    #Finds the rows and columns that are filled with a letter
+    # rowsFilled represents the indexes of all the rows that contain a letter in it
+    # columnsFilled represents the indexes of all the columns that contain a letter in it
     rowsFilled = []
     columnsFilled = []
 
+    #Finds the rows and columns that are filled with a letter, ignoring duplicates.
     for primaryIndex in range(BOARD_SIZE):
         for secondaryIndex in range(BOARD_SIZE):
             if len(Board[primaryIndex][secondaryIndex]) > 0 and not isIn(primaryIndex, rowsFilled):
@@ -519,18 +521,18 @@ def maximumMoveScore():
 
     # Scans through every possible word in the wordPool
     for possibleWord in wordPool:
-        #Finds the best possible move for the first move
+        # Finds the best possible move for the first move. The possible location can only start in the middle
+        # of the Board, with either "H" or "V", which the code accounts for.
         if firstMove:
             possibleLocation = [str(MIDDLE_OF_BOARD),str(MIDDLE_OF_BOARD),"H"]
-
+            # Ensures that the word can be made up of the tiles first before checking if the location is valid
+            # and if the move's score is higher than the max score.
             if tileCheck(possibleWord, myTiles):
                 if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
+                    # Proceeds to update the max word and max score with the max position
                     maxWord = possibleWord
                     maxScore = moveScore(possibleWord,possibleLocation)
                     maxPosition = possibleLocation
-                
-                # The possible location can only start in the middle of the board, with either
-                # "H" or "V"
                 else:
                     possibleLocation[2] = "V"
                     if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
@@ -540,11 +542,14 @@ def maximumMoveScore():
         
         # Deals with finding the best possible move AFTER the first move
         else:
+            # Scans through all of the columns/rows, generalised under "secondaryNumber" as long as the word
+            # can fit in the Board
             for secondaryNumber in range(BOARD_SIZE - len(possibleWord) + 1):
                 # Varies the row number for words to be placed horizontally
                 for rowNumber in rowsFilled:
                     possibleLocation = [str(rowNumber),str(secondaryNumber),"H"]
                     
+                    # Creates duplicateTiles from myTiles, adding tiles already on the Board, to be used in tileCheck
                     duplicateTiles = myTiles.copy()
                     for letterPair in currentTileCheck(possibleWord,possibleLocation):
                         duplicateTiles.append(letterPair[1])
@@ -555,7 +560,7 @@ def maximumMoveScore():
                             maxScore = moveScore(possibleWord,possibleLocation)
                             maxPosition = possibleLocation
 
-                # Varies the column number for words to be placed horizontally
+                # Varies the column number for words to be placed vertically
                 for columnNumber in columnsFilled:
                     possibleLocation = [str(secondaryNumber),str(columnNumber),"V"]
                     
