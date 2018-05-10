@@ -139,7 +139,7 @@ printTiles(myTiles)
 """
 Purpose: This file is to be used in Assignment 2 for FIT1045.
 Author: Anonymous
-Last modified: 8 May 2018
+Last modified: 10 May 2018
 """
 
 # Global variables declared to be used throughout the code
@@ -397,19 +397,35 @@ def locationPlaceCheck(word,location):
     
     return [True]
 
-"""
+""" locationIsValid(word,location)
+
+Function will check if both functions, locationSyntaxCheck and locationPlaceCheck, are satisfied.
+
+arguments: word: The word ot be passed into both functions for checking.
+           location: The location to be passed into both functions for checking.
+
+returns: Returns False if either of the functions are false. True otherwise.
+
 """
 def locationIsValid(word,location):
     if locationSyntaxCheck(location) == False:
         print("Invalid move!!!")
         return False
     elif locationPlaceCheck(word,location)[0] == False:
-        #Prints the reason for failure
+        #Prints the reason for failure, see locationPlaceCheck documentation
         print(locationPlaceCheck(word,location)[1])
         return False
     return True
 
-#This function will place the VALID word into Board using the location (r:c:d) given
+""" tilePlacer(word,location)
+
+Function will place the valid word into the list of lists, Board.
+
+arguments: word: The word to be placed.
+           location: The location (in r:c:d format) for the word to be placed on the Board
+
+returns: No returns
+"""
 def tilePlacer(word,location):
     row = int(location[0])
     column = int(location[1])
@@ -423,29 +439,47 @@ def tilePlacer(word,location):
             WordIndex += 1
 
     #Dealing with where the word is to be placed vertically
-    elif location[2] == "V": #META: May need changing to just else: ?
+    elif location[2] == "V":
         endPoint = row + len(word)
         for rowNumber in range(row, endPoint):
             Board[rowNumber][column] = word[WordIndex]
             WordIndex += 1
 
-def tileRemover(word,location):
+""" tileRemover(word,location)
+
+Removes the letters from primaryList, which contains the letters already on the Board at
+a location previously defined (see bottom of code). This allows for the pre-existing tiles
+on the Board to be acknowledged and removed. Letters that are not in primaryList are removed
+from myTiles.
+
+arguments: word: The word to be scanned through and have all of its letters removed from 
+                 primaryList OR myTiles
+    
+returns: Nothing.
+"""
+def tileRemover(word):
     for letter in word:
         if isIn(letter,primaryList):
             primaryList.remove(letter)
         elif isIn(letter,myTiles):
             myTiles.remove(letter)
 
+""" maximumMoveScore()
 
+Function will find the maximum score for each move. Further documentation is in efficient.pdf.
+It is advised to read efficient.pdf for an overview before reading this function.
 
+arguments: None
+
+returns: None
+"""
 def maximumMoveScore():
     maxScore = 0
     maxWord = ""
     letterPool = []
     wordPool = []
 
-    #Finds the possible letters that the maximum move can be made from, by adding every letter in
-    #the Board and every letter in myTiles. This accounts for duplicates by not including them.
+    # Makes letterPool by adding myTiles' letters and letters in the Board
     for tile in myTiles:
         letterPool.append(tile)
 
@@ -453,8 +487,10 @@ def maximumMoveScore():
         for letter in row:
             if len(letter) > 0:
                 letterPool.append(letter) 
-    #Opens the dictionary file and scans through for every word that can be made from the letterPool
-    #AND is smaller than the Board dimensions, appending them into wordPool
+    
+
+    # Creates the wordPool by appending words from dictionary.txt, making sure they
+    # satisfy certain conditions
     dictionaryFile = open("dictionary.txt","r")
     
     for line in dictionaryFile:
@@ -463,10 +499,8 @@ def maximumMoveScore():
 
         if tileCheck(scannedWord,letterPool) == False:
             validWordFlag = False
-        
         elif len(scannedWord) > BOARD_SIZE:
             validWordFlag = False
-
         if validWordFlag:
             wordPool.append(scannedWord)
     dictionaryFile.close()
@@ -483,7 +517,7 @@ def maximumMoveScore():
             if len(Board[secondaryIndex][primaryIndex]) > 0 and not isIn(primaryIndex, columnsFilled):
                 columnsFilled.append(primaryIndex)
 
-    #For every word in the wordPool,
+    # Scans through every possible word in the wordPool
     for possibleWord in wordPool:
         #Finds the best possible move for the first move
         if firstMove:
@@ -495,6 +529,8 @@ def maximumMoveScore():
                     maxScore = moveScore(possibleWord,possibleLocation)
                     maxPosition = possibleLocation
                 
+                # The possible location can only start in the middle of the board, with either
+                # "H" or "V"
                 else:
                     possibleLocation[2] = "V"
                     if locationPlaceCheck(possibleWord,possibleLocation)[0] and (moveScore(possibleWord,possibleLocation) > maxScore):
@@ -502,9 +538,10 @@ def maximumMoveScore():
                         maxScore = moveScore(possibleWord,possibleLocation)
                         maxPosition = possibleLocation
         
-        #Deals with past the first move
+        # Deals with finding the best possible move AFTER the first move
         else:
             for secondaryNumber in range(BOARD_SIZE - len(possibleWord) + 1):
+                # Varies the row number for words to be placed horizontally
                 for rowNumber in rowsFilled:
                     possibleLocation = [str(rowNumber),str(secondaryNumber),"H"]
                     
@@ -518,6 +555,7 @@ def maximumMoveScore():
                             maxScore = moveScore(possibleWord,possibleLocation)
                             maxPosition = possibleLocation
 
+                # Varies the column number for words to be placed horizontally
                 for columnNumber in columnsFilled:
                     possibleLocation = [str(secondaryNumber),str(columnNumber),"V"]
                     
@@ -569,6 +607,6 @@ while True:
             tilePlacer(chosenWord,wordLocation)
             printBoard(Board)
 
-            tileRemover(chosenWord,wordLocation)
+            tileRemover(chosenWord)
             getTiles(myTiles)
             printTiles(myTiles)
