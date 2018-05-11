@@ -140,7 +140,7 @@ printTiles(myTiles)
 Purpose: This file is to be used in Assignment 2 for FIT1045.
 Author: Anonymous
 Last modified: 10 May 2018
-""" 
+"""
 
 # Global variables declared to be used throughout the code
 firstMove = True
@@ -397,20 +397,6 @@ def locationPlaceCheck(word,location):
     
     return [True]
 
-def usesOneTile(word,location):
-    duplicateTiles = myTiles.copy()
-    primaryList = []
-    for letterPair in currentTileCheck(word,location):
-        primaryList.append(letterPair[1])
-    originalLength = len(duplicateTiles)
-    
-    outcome = tileRemover(word, primaryList, duplicateTiles)
-
-    if originalLength != len(outcome[1]):
-        return False
-    
-    return True
-
 """ locationIsValid(word,location)
 
 Function will check if both functions, locationSyntaxCheck and locationPlaceCheck, are satisfied.
@@ -471,13 +457,12 @@ arguments: word: The word to be scanned through and have all of its letters remo
     
 returns: Nothing.
 """
-def tileRemover(word,list1, list2):
+def tileRemover(word):
     for letter in word:
-        if isIn(letter,list1):
-            list1.remove(letter)
-        elif isIn(letter,list2):
-            list2.remove(letter)
-    return [list1, list2]
+        if isIn(letter,primaryList):
+            primaryList.remove(letter)
+        elif isIn(letter,myTiles):
+            myTiles.remove(letter)
 
 """ maximumMoveScore()
 
@@ -614,15 +599,10 @@ while True:
     # Due to some assumptions from wordIsValid relying on if locationIsValid is true
     if locationIsValid(chosenWord, wordLocation):
         if wordIsValid(chosenWord,wordLocation):
-
-            # Handles the edge case of requiring one tile from your hand, continue method used
-            # to basically restart to the start of the loop
-            if firstMove == False and usesOneTile(chosenWord,wordLocation) != False:
-                print("Invalid move! Your move must use at least one tile from your hand.")
-                continue
-
             maximumMoveScore()
-            firstMove = False
+
+            if firstMove:
+                firstMove = False
             
             #Finding the move's score and adding it to the total score
             totalScore += moveScore(chosenWord,wordLocation)
@@ -638,6 +618,6 @@ while True:
             # Remaining functions called to advance to the next move
             tilePlacer(chosenWord,wordLocation)
             printBoard(Board)
-            tileRemover(chosenWord,primaryList,myTiles)
+            tileRemover(chosenWord)
             getTiles(myTiles)
             printTiles(myTiles)
