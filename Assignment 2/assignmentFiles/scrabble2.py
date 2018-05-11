@@ -139,7 +139,7 @@ printTiles(myTiles)
 """
 Purpose: This file is to be used in Assignment 2 for FIT1045.
 Author: Anonymous
-Last modified: 10 May 2018
+Last modified: 11 May 2018
 """
 
 # Global variables declared to be used throughout the code
